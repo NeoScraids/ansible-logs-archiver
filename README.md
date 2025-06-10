@@ -86,7 +86,7 @@ ansible-playbook -i inventory/hosts.yml playbook.yml
 Mira en `roles/logs_archiver` para más detalles.
 
 ## Autor
-Brandon Mendieta — [GitHub](https://github.com/USERNAME)
+Brandon Mendieta — [GitHub](https://github.com/NeoScraids)
 
 ## Licencia
 MIT — véase [LICENSE](LICENSE).
