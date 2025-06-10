@@ -88,12 +88,6 @@ Mira en `roles/logs_archiver` para más detalles.
 ## Autor
 Brandon Mendieta — [GitHub](https://github.com/NeoScraids)
 
-## Licencia
-MIT — véase [LICENSE](LICENSE).
-```
-
----
-
 ## inventory/hosts.yml
 ```yaml
 all:
