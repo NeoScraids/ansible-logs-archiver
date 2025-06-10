@@ -1,0 +1,7 @@
+- name: Archive logs en todos los servidores
+  hosts: all
+  become: true
+  vars_files:
+    - roles/logs_archiver/defaults/main.yml
+  roles:
+    - logs_archiver

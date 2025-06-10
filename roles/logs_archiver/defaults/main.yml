@@ -1,0 +1,5 @@
+---
+# Directorio fuente de logs\ nlogs_source_dir: /var/log/myapp
+# Directorio base para archivar\ narchive_base_dir: /var/log/archived_logs
+# Patrón de archivos\ nfile_pattern: '*.log'
+# ¿Eliminar logs originales? \ ncleanup: true

@@ -1,0 +1,33 @@
+---
+- name: Encontrar archivos de log
+  ansible.builtin.find:
+    paths: "{{ logs_source_dir }}"
+    patterns: "{{ file_pattern }}"
+  register: found_logs
+
+- name: Set fact de fecha
+  ansible.builtin.set_fact:
+    archive_date: "{{ ansible_date_time.date }}"
+
+- name: Crear carpeta de archivo\ n  ansible.builtin.file:
+    path: "{{ archive_base_dir }}/{{ archive_date }}"
+    state: directory
+    mode: '0755'
+
+- name: Comprimir y renombrar cada log
+  loop: "{{ found_logs.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
+  vars:
+    base_name: "{{ ansible_hostname }}_{{ ansible_default_ipv4.address }}_{{ item.path | basename }}.tar.gz"
+    dest_path: "{{ archive_base_dir }}/{{ archive_date }}/{{ base_name }}"
+  ansible.builtin.archive:
+    path: "{{ item.path }}"
+    dest: "{{ dest_path }}"
+  when: found_logs.matched > 0
+
+- name: Eliminar log original tras archivar
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  when: cleanup and found_logs.matched > 0

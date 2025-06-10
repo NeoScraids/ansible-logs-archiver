@@ -1,0 +1,5 @@
+---
+- name: Recargar rsyslog (opcional)
+  ansible.builtin.service:
+    name: rsyslog
+    state: reloaded
