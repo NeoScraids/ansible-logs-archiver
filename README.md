@@ -10,25 +10,40 @@ ansible-logs-archiver/
 ├── inventory/
 │   └── hosts.yml
 ├── playbook.yml
-└── roles/
-    └── logs_archiver/
-        ├── defaults/
-        │   └── main.yml
-        ├── meta/
-        │   └── main.yml
-        ├── tasks/
-        │   └── main.yml
-        └── handlers/
-            └── main.yml
+├── roles/
+│   └── logs_archiver/
+│       ├── defaults/
+│       │   └── main.yml
+│       ├── meta/
+│       │   └── main.yml
+│       ├── tasks/
+│       │   └── main.yml
+│       └── handlers/
+│           └── main.yml
+└── .github/
+    └── workflows/
+        ├── refresh-readme.yml
+        ├── ansible-lint.yml
+        └── molecule-test.yml
+```
+
+---
+
+## Configurar Git globalmente
+Para que tus commits siempre usen tu usuario **NeoScraids**, añade esto a tu `~/.gitconfig` o ejecútalo en tu terminal:
+```bash
+git config --global user.name "NeoScraids"
+git config --global user.email "NeoScraids@users.noreply.github.com"
 ```
 
 ---
 
 ## .gitignore
 ```gitignore
-# Evitar archivos de retry de Ansible
+# Archivos de retry de Ansible
 env.retry
-# Editores\ n.vscode/
+# Configuración de editores
+.vscode/
 ``` 
 
 ---
@@ -37,11 +52,10 @@ env.retry
 ```text
 MIT License
 
-Copyright (c) 2025 Brandon Mendieta
+Copyright (c) 2025 NeoScraids
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction...
+...
 ``` 
 
 ---
@@ -50,148 +64,108 @@ in the Software without restriction...
 ```markdown
 # ansible-logs-archiver
 
-> Archiva logs renombrados con hostname, IP y fecha, y organiza los `.tar.gz` por carpetas con fecha.
+> Archiva logs renombrados con hostname, IP y fecha; organiza los `.tar.gz` por carpetas de fecha.
 
 ## Características
 - Busca archivos `.log` en el directorio fuente.
 - Renombra a `<hostname>_<IP>_<original_filename>.tar.gz`.
 - Organiza en `<archive_base_dir>/YYYY-MM-DD/`.
-- Limpieza opcional de logs originales.
+- Elimina logs originales si `cleanup: true`.
 
 ## Requisitos Previos
-- Ansible 2.9+ y Python 3.x
-- Conexión SSH con sudo habilitado.
+- Ansible 2.9+ y Python 3.x.
+- SSH con sudo.
 
 ## Uso
 ```bash
-git clone https://github.com/USERNAME/ansible-logs-archiver.git
+git clone https://github.com/NeoScraids/ansible-logs-archiver.git
 cd ansible-logs-archiver
-```
-1. Edita `inventory/hosts.yml` con tus servidores.
-2. Ajusta variables en `roles/logs_archiver/defaults/main.yml`.
-3. Ejecuta:
-```bash
 ansible-playbook -i inventory/hosts.yml playbook.yml
 ```
 
-## Variables
-| Variable            | Descripción                                    | Valor por defecto            |
-|---------------------|------------------------------------------------|------------------------------|
-| `logs_source_dir`   | Ruta donde buscar logs                         | `/var/log/myapp`             |
-| `archive_base_dir`  | Carpeta base de destino de los `.tar.gz`       | `/var/log/archived_logs`     |
-| `file_pattern`      | Patrón de búsqueda de archivos (`glob`)        | `*.log`                      |
-| `cleanup`           | Eliminar logs originales tras archivar         | `true`                       |
+## Estructura
+detallada arriba.
 
-## Estructura del Role
-Mira en `roles/logs_archiver` para más detalles.
+## Variables
+| Variable           | Descripción                                  | Valor por defecto            |
+|--------------------|----------------------------------------------|------------------------------|
+| `logs_source_dir`  | Ruta de los logs                             | `/var/log/myapp`             |
+| `archive_base_dir` | Ruta destino de los `.tar.gz`                | `/var/log/archived_logs`     |
+| `file_pattern`     | Patrón de archivos (`glob`)                  | `*.log`                      |
+| `cleanup`          | ¿Eliminar logs originales tras archivar?      | `true`                       |
 
 ## Autor
-Brandon Mendieta — [GitHub](https://github.com/NeoScraids)
+NeoScraids — [GitHub](https://github.com/NeoScraids)
 
 ## Licencia
-MIT — véase [LICENSE](LICENSE).
+MIT — véase [LICENSE](LICENSE)
 ```
 
 ---
 
-## inventory/hosts.yml
-```yaml
-all:
-  hosts:
-    servidor1.example.com:
-    servidor2.example.com:
-``` 
+## Workflows GitHub Actions
+Coloca estos archivos en `.github/workflows/` para CI/CD:
 
----
-
-## playbook.yml
+### 1. Actualizar README (`refresh-readme.yml`)
 ```yaml
-- name: Archive logs en todos los servidores
-  hosts: all
-  become: true
-  vars_files:
-    - roles/logs_archiver/defaults/main.yml
-  roles:
-    - logs_archiver
+name: 👉 Actualizar README
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Regenerar estadísticas
+        run: echo "Nothing to build; badges vienen de GitHub Readme Stats"
+      - name: Commit README actualizado
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "chore: Actualizar GitHub README"
+          author_name: "NeoScraids"
+          author_email: "NeoScraids@users.noreply.github.com"
 ```
 
----
-
-## roles/logs_archiver/defaults/main.yml
+### 2. Lint Ansible (`ansible-lint.yml`)
 ```yaml
----
-# Directorio fuente de logs\ nlogs_source_dir: /var/log/myapp
-# Directorio base para archivar\ narchive_base_dir: /var/log/archived_logs
-# Patrón de archivos\ nfile_pattern: '*.log'
-# ¿Eliminar logs originales? \ ncleanup: true
-``` 
-
----
-
-## roles/logs_archiver/meta/main.yml
-```yaml
----
-galaxy_info:
-  role_name: logs_archiver
-  author: Brandon Mendieta
-  description: "Archiva logs renombrando con hostname, IP y fecha."
-  company: TuEmpresa
-  license: MIT
-  min_ansible_version: 2.9
-  platforms:
-    - name: EL
-      versions:
-        - 7
-        - 8
-dependencies: []
+name: Lint Ansible Role
+on:
+  push:
+    paths:
+      - 'roles/logs_archiver/**'
+  pull_request:
+jobs:
+  ansible-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - run: pip install ansible-lint
+      - run: ansible-lint roles/logs_archiver
 ```
 
----
-
-## roles/logs_archiver/tasks/main.yml
+### 3. Tests con Molecule (`molecule-test.yml`)
 ```yaml
----
-- name: Encontrar archivos de log
-  ansible.builtin.find:
-    paths: "{{ logs_source_dir }}"
-    patterns: "{{ file_pattern }}"
-  register: found_logs
-
-- name: Set fact de fecha
-  ansible.builtin.set_fact:
-    archive_date: "{{ ansible_date_time.date }}"
-
-- name: Crear carpeta de archivo\ n  ansible.builtin.file:
-    path: "{{ archive_base_dir }}/{{ archive_date }}"
-    state: directory
-    mode: '0755'
-
-- name: Comprimir y renombrar cada log
-  loop: "{{ found_logs.files }}"
-  loop_control:
-    label: "{{ item.path | basename }}"
-  vars:
-    base_name: "{{ ansible_hostname }}_{{ ansible_default_ipv4.address }}_{{ item.path | basename }}.tar.gz"
-    dest_path: "{{ archive_base_dir }}/{{ archive_date }}/{{ base_name }}"
-  ansible.builtin.archive:
-    path: "{{ item.path }}"
-    dest: "{{ dest_path }}"
-  when: found_logs.matched > 0
-
-- name: Eliminar log original tras archivar
-  ansible.builtin.file:
-    path: "{{ item.path }}"
-    state: absent
-  when: cleanup and found_logs.matched > 0
-``` 
-
----
-
-## roles/logs_archiver/handlers/main.yml
-```yaml
----
-- name: Recargar rsyslog (opcional)
-  ansible.builtin.service:
-    name: rsyslog
-    state: reloaded
+name: Molecule Test
+on:
+  push:
+    paths:
+      - 'roles/logs_archiver/**'
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - run: |
+          pip install molecule[docker] docker ansible
+      - run: molecule test -s default
 ```
